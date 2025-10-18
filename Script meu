@@ -1,0 +1,196 @@
+-- LocalScript (colocar em StarterGui)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- Configurações visuais
+local WINDOW_SIZE = UDim2.new(0, 220, 0, 130)
+
+-- cria ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KaioHubGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- cria janela principal
+local frame = Instance.new("Frame")
+frame.Name = "KaioHubWindow"
+frame.Size = WINDOW_SIZE
+frame.Position = UDim2.new(0.05, 0, 0.05, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- 🔴 borda vermelha fina
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+-- arredondar cantos
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+-- título
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, -30, 0, 40)
+title.Position = UDim2.new(0, 6, 0, 6)
+title.BackgroundTransparency = 1
+title.Text = "Kaio Hub — atravessar parede"
+title.TextColor3 = Color3.fromRGB(255, 80, 80)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+-- botão X (fechar)
+local closeButton = Instance.new("TextButton")
+closeButton.Name = "CloseButton"
+closeButton.Size = UDim2.new(0, 22, 0, 22)
+closeButton.Position = UDim2.new(1, -26, 0, 6)
+closeButton.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
+closeButton.Text = "X"
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 14
+closeButton.TextColor3 = Color3.fromRGB(255,255,255)
+closeButton.Parent = frame
+Instance.new("UICorner", closeButton).CornerRadius = UDim.new(0, 6)
+
+closeButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+-- status
+local status = Instance.new("TextLabel")
+status.Name = "Status"
+status.Size = UDim2.new(1, -12, 0, 20)
+status.Position = UDim2.new(0, 6, 0, 50)
+status.BackgroundTransparency = 1
+status.Text = "Desligado"
+status.TextColor3 = Color3.fromRGB(200,200,200)
+status.Font = Enum.Font.Gotham
+status.TextSize = 14
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = frame
+
+-- container botões
+local buttonContainer = Instance.new("Frame")
+buttonContainer.Name = "Buttons"
+buttonContainer.Size = UDim2.new(1, -12, 0, 40)
+buttonContainer.Position = UDim2.new(0, 6, 1, -46)
+buttonContainer.BackgroundTransparency = 1
+buttonContainer.Parent = frame
+
+-- botão ON (azul)
+local btnOn = Instance.new("TextButton")
+btnOn.Name = "OnButton"
+btnOn.Size = UDim2.new(0.48, 0, 1, 0)
+btnOn.Position = UDim2.new(0, 0, 0, 0)
+btnOn.Text = "ON"
+btnOn.Font = Enum.Font.GothamBold
+btnOn.TextSize = 16
+btnOn.TextColor3 = Color3.fromRGB(255,255,255)
+btnOn.BackgroundColor3 = Color3.fromRGB(24, 115, 255)
+btnOn.Parent = buttonContainer
+Instance.new("UICorner", btnOn).CornerRadius = UDim.new(0,6)
+
+-- botão OFF (vermelho)
+local btnOff = Instance.new("TextButton")
+btnOff.Name = "OffButton"
+btnOff.Size = UDim2.new(0.48, 0, 1, 0)
+btnOff.Position = UDim2.new(0.52, 0, 0, 0)
+btnOff.Text = "OFF"
+btnOff.Font = Enum.Font.GothamBold
+btnOff.TextSize = 16
+btnOff.TextColor3 = Color3.fromRGB(255,255,255)
+btnOff.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
+btnOff.Parent = buttonContainer
+Instance.new("UICorner", btnOff).CornerRadius = UDim.new(0,6)
+
+-- 🔔 Função de notificação (pequena e discreta)
+local function showNotification(msg, color)
+	local note = Instance.new("TextLabel")
+	note.Size = UDim2.new(0, 120, 0, 25)
+	note.Position = UDim2.new(1, -130, 1, -60)
+	note.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	note.BackgroundTransparency = 0.3
+	note.BorderSizePixel = 0
+	note.Text = msg
+	note.TextColor3 = color or Color3.fromRGB(255,255,255)
+	note.Font = Enum.Font.GothamBold
+	note.TextSize = 13
+	note.TextTransparency = 0.1
+	note.Parent = screenGui
+	Instance.new("UICorner", note).CornerRadius = UDim.new(0,8)
+
+	task.spawn(function()
+		wait(2)
+		note:Destroy()
+	end)
+end
+
+-- ⚙️ Funções Noclip
+local noclipEnabled = false
+local noclipConnection
+
+local function enableNoclip()
+	noclipEnabled = true
+	status.Text = "Ligado (atravessando paredes)"
+	status.TextColor3 = Color3.fromRGB(150,255,150)
+	showNotification("Ativado", Color3.fromRGB(0,255,0))
+	noclipConnection = RunService.Stepped:Connect(function()
+		local char = player.Character
+		if char then
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+		end
+	end)
+end
+
+local function disableNoclip()
+	noclipEnabled = false
+	status.Text = "Desligado"
+	status.TextColor3 = Color3.fromRGB(200,200,200)
+	showNotification("Desativado", Color3.fromRGB(255,80,80))
+	if noclipConnection then
+		noclipConnection:Disconnect()
+		noclipConnection = nil
+	end
+	local char = player.Character
+	if char then
+		for _, part in ipairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+			end
+		end
+	end
+end
+
+btnOn.MouseButton1Click:Connect(enableNoclip)
+btnOff.MouseButton1Click:Connect(disableNoclip)
+
+player.CharacterAdded:Connect(function(char)
+	wait(0.1)
+	if noclipEnabled then
+		for _, part in ipairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.N then
+			if noclipEnabled then disableNoclip() else enableNoclip() end
+		end
+	end
+end)
+
+disableNoclip()
