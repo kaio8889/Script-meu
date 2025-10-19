@@ -641,4 +641,114 @@ player.CharacterAdded:Connect(function(char)
 		end
 	end
 	-- Reapply ESP highlight se ativado
-	if espEnabled and
+	if espEnabled and char then
+		local pl = Players:GetPlayerFromCharacter(char)
+		if pl and pl ~= player then
+			local h = createHighlightForChar(char)
+			espHighlights[pl] = h
+		end
+	end
+end)
+
+-- Event hookups for toggles and controls
+
+-- Speed box change and plus/minus
+local function updateSpeedFromBox()
+	local n = tonumber(speedBox.Text) or DEFAULT_WALKSPEED
+	speedValue = clamp(math.floor(n), MIN_SPEED, MAX_SPEED)
+	speedBox.Text = tostring(speedValue)
+end
+
+minusBtn.MouseButton1Click:Connect(function()
+	updateSpeedFromBox()
+	speedValue = clamp(speedValue - 1, MIN_SPEED, MAX_SPEED)
+	speedBox.Text = tostring(speedValue)
+end)
+
+plusBtn.MouseButton1Click:Connect(function()
+	updateSpeedFromBox()
+	speedValue = clamp(speedValue + 1, MIN_SPEED, MAX_SPEED)
+	speedBox.Text = tostring(speedValue)
+end)
+
+speedBox.FocusLost:Connect(function(enterPressed)
+	updateSpeedFromBox()
+end)
+
+-- ESP toggle (agora abaixo do speed)
+espBtn.MouseButton1Click:Connect(function()
+	if espEnabled then
+		disableESP()
+	else
+		enableESP()
+	end
+end)
+
+-- Extra toggles
+flyBtn.MouseButton1Click:Connect(function()
+	if flyEnabled then
+		disableFly()
+	else
+		enableFly()
+	end
+end)
+
+ijBtn.MouseButton1Click:Connect(function()
+	if infiniteJumpEnabled then
+		disableInfiniteJump()
+	else
+		enableInfiniteJump()
+	end
+end)
+
+noclipBtn.MouseButton1Click:Connect(function()
+	if noclipEnabled then
+		disableNoclip()
+	else
+		enableNoclip()
+	end
+end)
+
+teleportBtn.MouseButton1Click:Connect(function()
+	if teleportEnabled then
+		disableTeleportClick()
+	else
+		enableTeleportClick()
+	end
+end)
+
+-- Expand/Collapse behavior
+local expanded = false
+expandBtn.MouseButton1Click:Connect(function()
+	expanded = not expanded
+	extraFrame.Visible = expanded
+	if expanded then
+		frame.Size = UDim2.new(0, 220, 0, EXPANDED_HEIGHT)
+		expandBtn.Text = "<"
+	else
+		frame.Size = UDim2.new(0, 220, 0, COLLAPSED_HEIGHT)
+		expandBtn.Text = ">"
+	end
+end)
+
+-- Initial state
+disableNoclip()
+speedBox.Text = tostring(DEFAULT_WALKSPEED)
+speedValue = DEFAULT_WALKSPEED
+startSpeedLoop()
+
+-- Close button behavior: reset alguns estados e destruir GUI
+closeButton.MouseButton1Click:Connect(function()
+	local char = player.Character
+	if char then
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = DEFAULT_WALKSPEED
+		end
+	end
+
+	-- Desativar funcionalidades ativas
+	disableNoclip()
+	stopSpeedLoop()
+	disableFly()
+	disableInfiniteJump()
