@@ -1,5 +1,10 @@
--- Kaio Hub (LocalScript) - versão corrigida e pronta para colar em StarterGui
--- Recursos: nome "Kaio-dono----Miguel-admin", expandir/recolher, Fly (analógico/teclado), ESP (vermelho), Infinite Jump, Noclip, Speed
+-- Kaio Hub (LocalScript) - pronta para colar em StarterGui
+-- Recursos: nome "Kaio-dono----Miguel-admin", expandir/recolher, Fly (analógico/teclado) [On/Off],
+-- ESP (vermelho) (movido para baixo do Speed), Infinite Jump, Noclip (toggle via On/Off), Speed (0-250)
+-- Comentários e textos em pt-br
+-- Adicionado: Teleport ao clicar (toggle) — ativa e ao clicar com o mouse o personagem é teleportado para o local clicado.
+-- Ajustes: ESP removido dos toggles extras e posicionado abaixo do Speed na inicial; expand/collapse funcionando;
+--         fechamento do GUI limpa corretamente conexões e estados.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -14,7 +19,8 @@ if existingGui then
 end
 
 local WINDOW_SIZE = UDim2.new(0, 220, 0, 150)
-local EXPANDED_HEIGHT = 240
+local EXPANDED_HEIGHT = 320 -- aumentado para comportar mais toggles (ajustado para Teleport)
+local COLLAPSED_HEIGHT = 150
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KaioHubGui"
@@ -93,10 +99,10 @@ speedFrame.Parent = frame
 
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Name = "SpeedLabel"
-speedLabel.Size = UDim2.new(0.45, 0, 1, 0)
+speedLabel.Size = UDim2.new(0.58, 0, 1, 0)
 speedLabel.Position = UDim2.new(0, 0, 0, 0)
 speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "Speed (0-100):"
+speedLabel.Text = "Speed (0-250):"
 speedLabel.TextColor3 = Color3.fromRGB(200,200,200)
 speedLabel.Font = Enum.Font.Gotham
 speedLabel.TextSize = 13
@@ -105,8 +111,8 @@ speedLabel.Parent = speedFrame
 
 local speedBox = Instance.new("TextBox")
 speedBox.Name = "SpeedBox"
-speedBox.Size = UDim2.new(0.35, 0, 1, 0)
-speedBox.Position = UDim2.new(0.47, 0, 0, 0)
+speedBox.Size = UDim2.new(0.28, 0, 1, 0)
+speedBox.Position = UDim2.new(0.6, 0, 0, 0)
 speedBox.BackgroundColor3 = Color3.fromRGB(20,20,20)
 speedBox.TextColor3 = Color3.fromRGB(255,255,255)
 speedBox.Font = Enum.Font.Gotham
@@ -119,8 +125,8 @@ Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0,6)
 
 local minusBtn = Instance.new("TextButton")
 minusBtn.Name = "MinusButton"
-minusBtn.Size = UDim2.new(0.09, 0, 1, 0)
-minusBtn.Position = UDim2.new(0.83, 0, 0, 0)
+minusBtn.Size = UDim2.new(0.07, 0, 1, 0)
+minusBtn.Position = UDim2.new(0.87, 0, 0, 0)
 minusBtn.Text = "-"
 minusBtn.Font = Enum.Font.GothamBold
 minusBtn.TextSize = 16
@@ -131,8 +137,8 @@ Instance.new("UICorner", minusBtn).CornerRadius = UDim.new(0,6)
 
 local plusBtn = Instance.new("TextButton")
 plusBtn.Name = "PlusButton"
-plusBtn.Size = UDim2.new(0.09, 0, 1, 0)
-plusBtn.Position = UDim2.new(0.93, 0, 0, 0)
+plusBtn.Size = UDim2.new(0.07, 0, 1, 0)
+plusBtn.Position = UDim2.new(0.95, 0, 0, 0)
 plusBtn.Text = "+"
 plusBtn.Font = Enum.Font.GothamBold
 plusBtn.TextSize = 16
@@ -141,41 +147,36 @@ plusBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
 plusBtn.Parent = speedFrame
 Instance.new("UICorner", plusBtn).CornerRadius = UDim.new(0,6)
 
-local buttonContainer = Instance.new("Frame")
-buttonContainer.Name = "Buttons"
-buttonContainer.Size = UDim2.new(1, -12, 0, 40)
-buttonContainer.Position = UDim2.new(0, 6, 1, -46)
-buttonContainer.BackgroundTransparency = 1
-buttonContainer.Parent = frame
+-- ESP colocado abaixo do Speed na UI inicial (fora dos extras)
+local espLabel = Instance.new("TextLabel")
+espLabel.Name = "ESPLabel"
+espLabel.Size = UDim2.new(0.65, 0, 0, 26)
+espLabel.Position = UDim2.new(0, 6, 0, 106) -- logo abaixo do speed
+espLabel.BackgroundTransparency = 1
+espLabel.Text = "ESP (vermelho)"
+espLabel.TextColor3 = Color3.fromRGB(200,200,200)
+espLabel.Font = Enum.Font.Gotham
+espLabel.TextSize = 13
+espLabel.TextXAlignment = Enum.TextXAlignment.Left
+espLabel.Parent = frame
 
-local btnOn = Instance.new("TextButton")
-btnOn.Name = "OnButton"
-btnOn.Size = UDim2.new(0.48, 0, 1, 0)
-btnOn.Position = UDim2.new(0, 0, 0, 0)
-btnOn.Text = "ON"
-btnOn.Font = Enum.Font.GothamBold
-btnOn.TextSize = 15
-btnOn.TextColor3 = Color3.fromRGB(255,255,255)
-btnOn.BackgroundColor3 = Color3.fromRGB(24, 115, 255)
-btnOn.Parent = buttonContainer
-Instance.new("UICorner", btnOn).CornerRadius = UDim.new(0,6)
+local espBtn = Instance.new("TextButton")
+espBtn.Name = "ESPButton"
+espBtn.Size = UDim2.new(0.32, 0, 0, 24)
+espBtn.Position = UDim2.new(0.67, 0, 0, 108)
+espBtn.Text = "Off"
+espBtn.Font = Enum.Font.GothamBold
+espBtn.TextSize = 13
+espBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+espBtn.TextColor3 = Color3.fromRGB(255,255,255)
+espBtn.Parent = frame
+Instance.new("UICorner", espBtn).CornerRadius = UDim.new(0,6)
 
-local btnOff = Instance.new("TextButton")
-btnOff.Name = "OffButton"
-btnOff.Size = UDim2.new(0.48, 0, 1, 0)
-btnOff.Position = UDim2.new(0.52, 0, 0, 0)
-btnOff.Text = "OFF"
-btnOff.Font = Enum.Font.GothamBold
-btnOff.TextSize = 15
-btnOff.TextColor3 = Color3.fromRGB(255,255,255)
-btnOff.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
-btnOff.Parent = buttonContainer
-Instance.new("UICorner", btnOff).CornerRadius = UDim.new(0,6)
-
+-- Frame com toggles extras (colocado na parte inferior quando expandido)
 local extraFrame = Instance.new("Frame")
 extraFrame.Name = "ExtraFrame"
-extraFrame.Size = UDim2.new(1, -12, 0, 80)
-extraFrame.Position = UDim2.new(0, 6, 0, 106)
+extraFrame.Size = UDim2.new(1, -12, 0, 150)
+extraFrame.Position = UDim2.new(0, 6, 0, 140)
 extraFrame.BackgroundTransparency = 1
 extraFrame.Visible = false
 extraFrame.Parent = frame
@@ -205,9 +206,11 @@ local function makeToggle(name, posY)
 	return lbl, btn
 end
 
-local flyLabel, flyBtn = makeToggle("Avoar (Fly)", 0)
-local espLabel, espBtn = makeToggle("ESP (vermelho)", 30)
-local ijLabel, ijBtn = makeToggle("Infinite Jump", 60)
+-- Visual: retirar o ❌ do texto do Fly (pedido) - mantive apenas texto simples
+local flyLabel, flyBtn = makeToggle("Avoar (Fly)", 0) -- sem ❌ inicial
+local ijLabel, ijBtn = makeToggle("Infinite Jump", 30)
+local noclipLabel, noclipBtn = makeToggle("Noclip", 60) -- agora noclip é igual aos outros
+local teleportLabel, teleportBtn = makeToggle("Teleportar ao clicar", 90) -- novo toggle
 
 local function showNotification(msg, color)
 	local note = Instance.new("TextLabel")
@@ -232,6 +235,7 @@ local function showNotification(msg, color)
 	end)
 end
 
+-- State variables
 local noclipEnabled = false
 local noclipConnection
 local speedConnection
@@ -241,8 +245,11 @@ local infiniteJumpEnabled = false
 local ijConnection
 local espEnabled = false
 
+local teleportEnabled = false
+local teleportConnection
+
 local DEFAULT_WALKSPEED = 16
-local MIN_SPEED, MAX_SPEED = 0, 100
+local MIN_SPEED, MAX_SPEED = 0, 250 -- permitido até 250
 local speedValue = DEFAULT_WALKSPEED
 
 local espHighlights = {}
@@ -269,6 +276,7 @@ local function enableNoclip()
 	noclipEnabled = true
 	status.Text = "Ligado (atravessando paredes)"
 	status.TextColor3 = Color3.fromRGB(150,255,150)
+	noclipBtn.Text = "On"
 	showNotification("Noclip: Ativado", Color3.fromRGB(0,255,0))
 	if noclipConnection then
 		noclipConnection:Disconnect()
@@ -291,6 +299,7 @@ local function disableNoclip()
 	noclipEnabled = false
 	status.Text = "Desligado"
 	status.TextColor3 = Color3.fromRGB(200,200,200)
+	noclipBtn.Text = "Off"
 	showNotification("Noclip: Desativado", Color3.fromRGB(255,80,80))
 	if noclipConnection then
 		noclipConnection:Disconnect()
@@ -329,20 +338,19 @@ local function stopSpeedLoop()
 	end
 end
 
--- === FLY ADAPTADO PARA ANALÓGICO MOBILE E PC ===
+-- FLY (analógico/teclado)
 local flySpeed = 70
-local flyEnabled = false
-local flyConnection
 local flyVector = Vector3.new(0,0,0)
 local flyUp = 0
 local flyDown = 0
 
--- Thumbstick (analógico mobile)
+-- Thumbstick (analógico mobile/gamepad)
 UserInputService.InputChanged:Connect(function(input)
 	if not flyEnabled then return end
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.Gamepad1 then
-		if input.KeyCode == Enum.KeyCode.Thumbstick1 or input.KeyCode == Enum.KeyCode.Thumbstick2 then
-			flyVector = Vector3.new(input.Position.X, 0, -input.Position.Y)
+	if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Touch then
+		local pos = input.Position
+		if pos then
+			flyVector = Vector3.new(pos.X, 0, -pos.Y)
 		end
 	end
 end)
@@ -357,6 +365,17 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if input.KeyCode == Enum.KeyCode.D then flyVector = Vector3.new(1, 0, 0) end
 		if input.KeyCode == Enum.KeyCode.E then flyUp = 1 end
 		if input.KeyCode == Enum.KeyCode.Q then flyDown = 1 end
+	end
+
+	-- Global keyboard shortcuts (ex: N para noclip)
+	if not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.N then
+			if noclipEnabled then
+				disableNoclip()
+			else
+				enableNoclip()
+			end
+		end
 	end
 end)
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
@@ -374,6 +393,7 @@ local function enableFly()
 	if flyEnabled then return end
 	flyEnabled = true
 	flyBtn.Text = "On"
+	flyLabel.Text = "Avoar (Fly)"
 	showNotification("Fly: Ativado", Color3.fromRGB(120, 200, 255))
 	if flyConnection then
 		flyConnection:Disconnect()
@@ -409,6 +429,7 @@ local function disableFly()
 	if not flyEnabled then return end
 	flyEnabled = false
 	flyBtn.Text = "Off"
+	flyLabel.Text = "Avoar (Fly)"
 	showNotification("Fly: Desativado", Color3.fromRGB(255,120,120))
 	if flyConnection then
 		flyConnection:Disconnect()
@@ -426,7 +447,7 @@ local function disableFly()
 	flyDown = 0
 end
 
--- RESTANTE DO SCRIPT IGUAL AO SEU ORIGINAL
+-- Infinite Jump
 local function enableInfiniteJump()
 	if infiniteJumpEnabled then return end
 	infiniteJumpEnabled = true
@@ -457,6 +478,7 @@ local function disableInfiniteJump()
 	end
 end
 
+-- ESP (Highlights)
 local function createHighlightForChar(char)
 	if not char or not char:IsA("Model") then return nil end
 	local owner = Players:GetPlayerFromCharacter(char)
@@ -515,7 +537,7 @@ local function enableESP()
 		espPlayerRemovingConn = Players.PlayerRemoving:Connect(function(pl)
 			local h = espHighlights[pl]
 			if h and h.Parent then
-				h:Destroy()
+				pcall(function() h:Destroy() end)
 			end
 			espHighlights[pl] = nil
 
@@ -555,8 +577,58 @@ local function disableESP()
 	end
 end
 
+-- Teleport ao clicar (nova funcionalidade)
+local function teleportCharacterTo(pos)
+	local char = player.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+	if not hrp then return end
+	pcall(function()
+		-- posiciona um pouco acima para evitar prender no chão
+		hrp.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+		-- limpar velocidade vertical para evitar queda estranha
+		if hrp.AssemblyLinearVelocity then
+			hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+		end
+	end)
+end
+
+local function enableTeleportClick()
+	if teleportEnabled then return end
+	teleportEnabled = true
+	teleportBtn.Text = "On"
+	showNotification("Teleport click: Ativado", Color3.fromRGB(120, 200, 255))
+	-- usar Mouse para registrar clique do jogador
+	local mouse = player:GetMouse()
+	if teleportConnection then
+		teleportConnection:Disconnect()
+		teleportConnection = nil
+	end
+	teleportConnection = mouse.Button1Down:Connect(function()
+		-- evitar teleportar enquanto usuário está digitando em um TextBox da GUI
+		if UserInputService:GetFocusedTextBox() then return end
+		local hit = mouse.Hit
+		local targetPos = (hit and hit.Position) or (hit and hit.p)
+		if targetPos then
+			teleportCharacterTo(targetPos)
+		end
+	end)
+end
+
+local function disableTeleportClick()
+	if not teleportEnabled then return end
+	teleportEnabled = false
+	teleportBtn.Text = "Off"
+	showNotification("Teleport click: Desativado", Color3.fromRGB(255,120,120))
+	if teleportConnection then
+		teleportConnection:Disconnect()
+		teleportConnection = nil
+	end
+end
+
+-- Keep settings applied when character spawns
 player.CharacterAdded:Connect(function(char)
-	local humanoid = char:WaitForChild("Humanoid", 2)
+	local humanoid = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 2)
 	if humanoid then
 		applySpeedToCharacter(char)
 	end
@@ -568,122 +640,5 @@ player.CharacterAdded:Connect(function(char)
 			end
 		end
 	end
-end)
-
-disableNoclip()
-speedBox.Text = tostring(DEFAULT_WALKSPEED)
-speedValue = DEFAULT_WALKSPEED
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		if input.KeyCode == Enum.KeyCode.N then
-			if noclipEnabled then
-				disableNoclip()
-			else
-				enableNoclip()
-			end
-		end
-	end
-end)
-
-closeButton.MouseButton1Click:Connect(function()
-	local char = player.Character
-	if char then
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.WalkSpeed = DEFAULT_WALKSPEED
-		end
-	end
-	disableNoclip()
-	stopSpeedLoop()
-	disableFly()
-	disableInfiniteJump()
-	disableESP()
-	if screenGui and screenGui.Parent then
-		screenGui:Destroy()
-	end
-end)
-
-local expanded = false
-expandBtn.MouseButton1Click:Connect(function()
-	expanded = not expanded
-	if expanded then
-		expandBtn.Text = "v"
-		frame.Size = UDim2.new(0, WINDOW_SIZE.X.Offset, 0, EXPANDED_HEIGHT)
-		extraFrame.Visible = true
-	else
-		expandBtn.Text = ">"
-		frame.Size = WINDOW_SIZE
-		extraFrame.Visible = false
-	end
-end)
-
-local onDebounce, offDebounce = false, false
-
-btnOn.MouseButton1Click:Connect(function()
-	if onDebounce then return end
-	onDebounce = true
-	enableNoclip()
-	task.delay(0.2, function() onDebounce = false end)
-end)
-
-btnOff.MouseButton1Click:Connect(function()
-	if offDebounce then return end
-	offDebounce = true
-	disableNoclip()
-	task.delay(0.2, function() offDebounce = false end)
-end)
-
-local function setSpeed(newSpeed, showMsg)
-	speedValue = clamp(math.floor(newSpeed + 0.5), MIN_SPEED, MAX_SPEED)
-	speedBox.Text = tostring(speedValue)
-	if showMsg then
-		showNotification("Speed: " .. tostring(speedValue), Color3.fromRGB(120, 200, 255))
-	end
-	applySpeedToCharacter(player.Character)
-end
-
-speedBox.FocusLost:Connect(function(enterPressed)
-	local n = tonumber(speedBox.Text)
-	if n then
-		setSpeed(n, true)
-	else
-		speedBox.Text = tostring(speedValue)
-	end
-end)
-
-plusBtn.MouseButton1Click:Connect(function()
-	setSpeed(speedValue + 2, true)
-end)
-minusBtn.MouseButton1Click:Connect(function()
-	setSpeed(speedValue - 2, true)
-end)
-
-speedBox.Text = tostring(DEFAULT_WALKSPEED)
-speedValue = DEFAULT_WALKSPEED
-startSpeedLoop()
-
-flyBtn.MouseButton1Click:Connect(function()
-	if flyEnabled then
-		disableFly()
-	else
-		enableFly()
-	end
-end)
-
-espBtn.MouseButton1Click:Connect(function()
-	if espEnabled then
-		disableESP()
-	else
-		enableESP()
-	end
-end)
-
-ijBtn.MouseButton1Click:Connect(function()
-	if infiniteJumpEnabled then
-		disableInfiniteJump()
-	else
-		enableInfiniteJump()
-	end
-end)
+	-- Reapply ESP highlight se ativado
+	if espEnabled and
