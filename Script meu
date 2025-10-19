@@ -1,50 +1,53 @@
--- LocalScript (colocar em StarterGui)
+-- Kaio Hub (LocalScript) - versão corrigida e pronta para colar em StarterGui
+-- Recursos: nome "Kaio-dono----Miguel-admin", expandir/recolher, Fly (analógico/teclado), ESP (vermelho), Infinite Jump, Noclip, Speed
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Configurações visuais
-local WINDOW_SIZE = UDim2.new(0, 220, 0, 130)
+local existingGui = playerGui:FindFirstChild("KaioHubGui")
+if existingGui then
+	existingGui:Destroy()
+end
 
--- cria ScreenGui
+local WINDOW_SIZE = UDim2.new(0, 220, 0, 150)
+local EXPANDED_HEIGHT = 240
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KaioHubGui"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.Parent = playerGui
 
--- cria janela principal
 local frame = Instance.new("Frame")
 frame.Name = "KaioHubWindow"
 frame.Size = WINDOW_SIZE
 frame.Position = UDim2.new(0.05, 0, 0.05, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
-frame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- 🔴 borda vermelha fina
+frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
 
--- arredondar cantos
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = frame
 
--- título
 local title = Instance.new("TextLabel")
 title.Name = "Title"
-title.Size = UDim2.new(1, -30, 0, 40)
+title.Size = UDim2.new(1, -30, 0, 34)
 title.Position = UDim2.new(0, 6, 0, 6)
 title.BackgroundTransparency = 1
-title.Text = "Kaio Hub — atravessar parede"
+title.Text = "Kaio-dono----Miguel-admin"
 title.TextColor3 = Color3.fromRGB(255, 80, 80)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 16
+title.TextSize = 13
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = frame
 
--- botão X (fechar)
 local closeButton = Instance.new("TextButton")
 closeButton.Name = "CloseButton"
 closeButton.Size = UDim2.new(0, 22, 0, 22)
@@ -57,24 +60,87 @@ closeButton.TextColor3 = Color3.fromRGB(255,255,255)
 closeButton.Parent = frame
 Instance.new("UICorner", closeButton).CornerRadius = UDim.new(0, 6)
 
-closeButton.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
-end)
+local expandBtn = Instance.new("TextButton")
+expandBtn.Name = "ExpandButton"
+expandBtn.Size = UDim2.new(0, 22, 0, 22)
+expandBtn.Position = UDim2.new(1, -56, 0, 6)
+expandBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+expandBtn.Text = ">"
+expandBtn.Font = Enum.Font.GothamBold
+expandBtn.TextSize = 14
+expandBtn.TextColor3 = Color3.fromRGB(255,255,255)
+expandBtn.Parent = frame
+Instance.new("UICorner", expandBtn).CornerRadius = UDim.new(0, 6)
 
--- status
 local status = Instance.new("TextLabel")
 status.Name = "Status"
-status.Size = UDim2.new(1, -12, 0, 20)
-status.Position = UDim2.new(0, 6, 0, 50)
+status.Size = UDim2.new(1, -12, 0, 18)
+status.Position = UDim2.new(0, 6, 0, 46)
 status.BackgroundTransparency = 1
 status.Text = "Desligado"
 status.TextColor3 = Color3.fromRGB(200,200,200)
 status.Font = Enum.Font.Gotham
-status.TextSize = 14
+status.TextSize = 13
 status.TextXAlignment = Enum.TextXAlignment.Left
 status.Parent = frame
 
--- container botões
+local speedFrame = Instance.new("Frame")
+speedFrame.Name = "SpeedFrame"
+speedFrame.Size = UDim2.new(1, -12, 0, 28)
+speedFrame.Position = UDim2.new(0, 6, 0, 68)
+speedFrame.BackgroundTransparency = 1
+speedFrame.Parent = frame
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Name = "SpeedLabel"
+speedLabel.Size = UDim2.new(0.45, 0, 1, 0)
+speedLabel.Position = UDim2.new(0, 0, 0, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Speed (0-100):"
+speedLabel.TextColor3 = Color3.fromRGB(200,200,200)
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextSize = 13
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Parent = speedFrame
+
+local speedBox = Instance.new("TextBox")
+speedBox.Name = "SpeedBox"
+speedBox.Size = UDim2.new(0.35, 0, 1, 0)
+speedBox.Position = UDim2.new(0.47, 0, 0, 0)
+speedBox.BackgroundColor3 = Color3.fromRGB(20,20,20)
+speedBox.TextColor3 = Color3.fromRGB(255,255,255)
+speedBox.Font = Enum.Font.Gotham
+speedBox.TextSize = 13
+speedBox.ClearTextOnFocus = false
+speedBox.Text = "16"
+speedBox.PlaceholderText = "16"
+speedBox.Parent = speedFrame
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0,6)
+
+local minusBtn = Instance.new("TextButton")
+minusBtn.Name = "MinusButton"
+minusBtn.Size = UDim2.new(0.09, 0, 1, 0)
+minusBtn.Position = UDim2.new(0.83, 0, 0, 0)
+minusBtn.Text = "-"
+minusBtn.Font = Enum.Font.GothamBold
+minusBtn.TextSize = 16
+minusBtn.TextColor3 = Color3.fromRGB(255,255,255)
+minusBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+minusBtn.Parent = speedFrame
+Instance.new("UICorner", minusBtn).CornerRadius = UDim.new(0,6)
+
+local plusBtn = Instance.new("TextButton")
+plusBtn.Name = "PlusButton"
+plusBtn.Size = UDim2.new(0.09, 0, 1, 0)
+plusBtn.Position = UDim2.new(0.93, 0, 0, 0)
+plusBtn.Text = "+"
+plusBtn.Font = Enum.Font.GothamBold
+plusBtn.TextSize = 16
+plusBtn.TextColor3 = Color3.fromRGB(255,255,255)
+plusBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+plusBtn.Parent = speedFrame
+Instance.new("UICorner", plusBtn).CornerRadius = UDim.new(0,6)
+
 local buttonContainer = Instance.new("Frame")
 buttonContainer.Name = "Buttons"
 buttonContainer.Size = UDim2.new(1, -12, 0, 40)
@@ -82,37 +148,71 @@ buttonContainer.Position = UDim2.new(0, 6, 1, -46)
 buttonContainer.BackgroundTransparency = 1
 buttonContainer.Parent = frame
 
--- botão ON (azul)
 local btnOn = Instance.new("TextButton")
 btnOn.Name = "OnButton"
 btnOn.Size = UDim2.new(0.48, 0, 1, 0)
 btnOn.Position = UDim2.new(0, 0, 0, 0)
 btnOn.Text = "ON"
 btnOn.Font = Enum.Font.GothamBold
-btnOn.TextSize = 16
+btnOn.TextSize = 15
 btnOn.TextColor3 = Color3.fromRGB(255,255,255)
 btnOn.BackgroundColor3 = Color3.fromRGB(24, 115, 255)
 btnOn.Parent = buttonContainer
 Instance.new("UICorner", btnOn).CornerRadius = UDim.new(0,6)
 
--- botão OFF (vermelho)
 local btnOff = Instance.new("TextButton")
 btnOff.Name = "OffButton"
 btnOff.Size = UDim2.new(0.48, 0, 1, 0)
 btnOff.Position = UDim2.new(0.52, 0, 0, 0)
 btnOff.Text = "OFF"
 btnOff.Font = Enum.Font.GothamBold
-btnOff.TextSize = 16
+btnOff.TextSize = 15
 btnOff.TextColor3 = Color3.fromRGB(255,255,255)
 btnOff.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
 btnOff.Parent = buttonContainer
 Instance.new("UICorner", btnOff).CornerRadius = UDim.new(0,6)
 
--- 🔔 Função de notificação (pequena e discreta)
+local extraFrame = Instance.new("Frame")
+extraFrame.Name = "ExtraFrame"
+extraFrame.Size = UDim2.new(1, -12, 0, 80)
+extraFrame.Position = UDim2.new(0, 6, 0, 106)
+extraFrame.BackgroundTransparency = 1
+extraFrame.Visible = false
+extraFrame.Parent = frame
+
+local function makeToggle(name, posY)
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.65, 0, 0, 26)
+	lbl.Position = UDim2.new(0, 0, 0, posY)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = name
+	lbl.TextColor3 = Color3.fromRGB(200,200,200)
+	lbl.Font = Enum.Font.Gotham
+	lbl.TextSize = 13
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.Parent = extraFrame
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.32, 0, 0, 24)
+	btn.Position = UDim2.new(0.67, 0, 0, posY+2)
+	btn.Text = "Off"
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 13
+	btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Parent = extraFrame
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+	return lbl, btn
+end
+
+local flyLabel, flyBtn = makeToggle("Avoar (Fly)", 0)
+local espLabel, espBtn = makeToggle("ESP (vermelho)", 30)
+local ijLabel, ijBtn = makeToggle("Infinite Jump", 60)
+
 local function showNotification(msg, color)
 	local note = Instance.new("TextLabel")
-	note.Size = UDim2.new(0, 120, 0, 25)
-	note.Position = UDim2.new(1, -130, 1, -60)
+	note.Size = UDim2.new(0, 160, 0, 26)
+	note.Position = UDim2.new(1, -170, 1, -60)
 	note.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	note.BackgroundTransparency = 0.3
 	note.BorderSizePixel = 0
@@ -125,21 +225,56 @@ local function showNotification(msg, color)
 	Instance.new("UICorner", note).CornerRadius = UDim.new(0,8)
 
 	task.spawn(function()
-		wait(2)
-		note:Destroy()
+		task.wait(2)
+		if note and note.Parent then
+			note:Destroy()
+		end
 	end)
 end
 
--- ⚙️ Funções Noclip
 local noclipEnabled = false
 local noclipConnection
+local speedConnection
+local flyEnabled = false
+local flyConnection
+local infiniteJumpEnabled = false
+local ijConnection
+local espEnabled = false
+
+local DEFAULT_WALKSPEED = 16
+local MIN_SPEED, MAX_SPEED = 0, 100
+local speedValue = DEFAULT_WALKSPEED
+
+local espHighlights = {}
+local playerCharConnections = {}
+local espPlayerAddedConn
+local espPlayerRemovingConn
+
+local function clamp(v, a, b)
+	if v < a then return a end
+	if v > b then return b end
+	return v
+end
+
+local function applySpeedToCharacter(char)
+	if not char then return end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = clamp(speedValue, MIN_SPEED, MAX_SPEED)
+	end
+end
 
 local function enableNoclip()
+	if noclipEnabled then return end
 	noclipEnabled = true
 	status.Text = "Ligado (atravessando paredes)"
 	status.TextColor3 = Color3.fromRGB(150,255,150)
-	showNotification("Ativado", Color3.fromRGB(0,255,0))
-	noclipConnection = RunService.Stepped:Connect(function()
+	showNotification("Noclip: Ativado", Color3.fromRGB(0,255,0))
+	if noclipConnection then
+		noclipConnection:Disconnect()
+		noclipConnection = nil
+	end
+	noclipConnection = RunService.RenderStepped:Connect(function()
 		local char = player.Character
 		if char then
 			for _, part in ipairs(char:GetDescendants()) do
@@ -152,10 +287,11 @@ local function enableNoclip()
 end
 
 local function disableNoclip()
+	if not noclipEnabled then return end
 	noclipEnabled = false
 	status.Text = "Desligado"
 	status.TextColor3 = Color3.fromRGB(200,200,200)
-	showNotification("Desativado", Color3.fromRGB(255,80,80))
+	showNotification("Noclip: Desativado", Color3.fromRGB(255,80,80))
 	if noclipConnection then
 		noclipConnection:Disconnect()
 		noclipConnection = nil
@@ -170,222 +306,384 @@ local function disableNoclip()
 	end
 end
 
-btnOn.MouseButton1Click:Connect(enableNoclip)
-btnOff.MouseButton1Click:Connect(disableNoclip)
-
-player.CharacterAdded:Connect(function(char)
-	wait(0.1)
-	if noclipEnabled then
-		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		if input.KeyCode == Enum.KeyCode.N then
-			if noclipEnabled then disableNoclip() else enableNoclip() end
-		end
-	end
-end)
-
-disableNoclip()-- LocalScript (colocar em StarterGui)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-
-local player = Players.LocalPlayer
-
--- Configurações visuais
-local WINDOW_SIZE = UDim2.new(0, 220, 0, 130)
-
--- cria ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KaioHubGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
-
--- cria janela principal
-local frame = Instance.new("Frame")
-frame.Name = "KaioHubWindow"
-frame.Size = WINDOW_SIZE
-frame.Position = UDim2.new(0.05, 0, 0.05, 0)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
-frame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- 🔴 borda vermelha fina
-frame.Active = true
-frame.Draggable = true
-frame.Parent = screenGui
-
--- arredondar cantos
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = frame
-
--- título
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Size = UDim2.new(1, -30, 0, 40)
-title.Position = UDim2.new(0, 6, 0, 6)
-title.BackgroundTransparency = 1
-title.Text = "Kaio Hub — atravessar parede"
-title.TextColor3 = Color3.fromRGB(255, 80, 80)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 16
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = frame
-
--- botão X (fechar)
-local closeButton = Instance.new("TextButton")
-closeButton.Name = "CloseButton"
-closeButton.Size = UDim2.new(0, 22, 0, 22)
-closeButton.Position = UDim2.new(1, -26, 0, 6)
-closeButton.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
-closeButton.Text = "X"
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 14
-closeButton.TextColor3 = Color3.fromRGB(255,255,255)
-closeButton.Parent = frame
-Instance.new("UICorner", closeButton).CornerRadius = UDim.new(0, 6)
-
-closeButton.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
-end)
-
--- status
-local status = Instance.new("TextLabel")
-status.Name = "Status"
-status.Size = UDim2.new(1, -12, 0, 20)
-status.Position = UDim2.new(0, 6, 0, 50)
-status.BackgroundTransparency = 1
-status.Text = "Desligado"
-status.TextColor3 = Color3.fromRGB(200,200,200)
-status.Font = Enum.Font.Gotham
-status.TextSize = 14
-status.TextXAlignment = Enum.TextXAlignment.Left
-status.Parent = frame
-
--- container botões
-local buttonContainer = Instance.new("Frame")
-buttonContainer.Name = "Buttons"
-buttonContainer.Size = UDim2.new(1, -12, 0, 40)
-buttonContainer.Position = UDim2.new(0, 6, 1, -46)
-buttonContainer.BackgroundTransparency = 1
-buttonContainer.Parent = frame
-
--- botão ON (azul)
-local btnOn = Instance.new("TextButton")
-btnOn.Name = "OnButton"
-btnOn.Size = UDim2.new(0.48, 0, 1, 0)
-btnOn.Position = UDim2.new(0, 0, 0, 0)
-btnOn.Text = "ON"
-btnOn.Font = Enum.Font.GothamBold
-btnOn.TextSize = 16
-btnOn.TextColor3 = Color3.fromRGB(255,255,255)
-btnOn.BackgroundColor3 = Color3.fromRGB(24, 115, 255)
-btnOn.Parent = buttonContainer
-Instance.new("UICorner", btnOn).CornerRadius = UDim.new(0,6)
-
--- botão OFF (vermelho)
-local btnOff = Instance.new("TextButton")
-btnOff.Name = "OffButton"
-btnOff.Size = UDim2.new(0.48, 0, 1, 0)
-btnOff.Position = UDim2.new(0.52, 0, 0, 0)
-btnOff.Text = "OFF"
-btnOff.Font = Enum.Font.GothamBold
-btnOff.TextSize = 16
-btnOff.TextColor3 = Color3.fromRGB(255,255,255)
-btnOff.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
-btnOff.Parent = buttonContainer
-Instance.new("UICorner", btnOff).CornerRadius = UDim.new(0,6)
-
--- 🔔 Função de notificação (pequena e discreta)
-local function showNotification(msg, color)
-	local note = Instance.new("TextLabel")
-	note.Size = UDim2.new(0, 120, 0, 25)
-	note.Position = UDim2.new(1, -130, 1, -60)
-	note.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	note.BackgroundTransparency = 0.3
-	note.BorderSizePixel = 0
-	note.Text = msg
-	note.TextColor3 = color or Color3.fromRGB(255,255,255)
-	note.Font = Enum.Font.GothamBold
-	note.TextSize = 13
-	note.TextTransparency = 0.1
-	note.Parent = screenGui
-	Instance.new("UICorner", note).CornerRadius = UDim.new(0,8)
-
-	task.spawn(function()
-		wait(2)
-		note:Destroy()
-	end)
-end
-
--- ⚙️ Funções Noclip
-local noclipEnabled = false
-local noclipConnection
-
-local function enableNoclip()
-	noclipEnabled = true
-	status.Text = "Ligado (atravessando paredes)"
-	status.TextColor3 = Color3.fromRGB(150,255,150)
-	showNotification("Ativado", Color3.fromRGB(0,255,0))
-	noclipConnection = RunService.Stepped:Connect(function()
+local function startSpeedLoop()
+	if speedConnection then return end
+	speedConnection = RunService.RenderStepped:Connect(function()
 		local char = player.Character
 		if char then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = false
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				local desired = clamp(speedValue, MIN_SPEED, MAX_SPEED)
+				if humanoid.WalkSpeed ~= desired then
+					humanoid.WalkSpeed = desired
 				end
 			end
 		end
 	end)
 end
 
-local function disableNoclip()
-	noclipEnabled = false
-	status.Text = "Desligado"
-	status.TextColor3 = Color3.fromRGB(200,200,200)
-	showNotification("Desativado", Color3.fromRGB(255,80,80))
-	if noclipConnection then
-		noclipConnection:Disconnect()
-		noclipConnection = nil
-	end
-	local char = player.Character
-	if char then
-		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = true
-			end
-		end
+local function stopSpeedLoop()
+	if speedConnection then
+		speedConnection:Disconnect()
+		speedConnection = nil
 	end
 end
 
-btnOn.MouseButton1Click:Connect(enableNoclip)
-btnOff.MouseButton1Click:Connect(disableNoclip)
+-- === FLY ADAPTADO PARA ANALÓGICO MOBILE E PC ===
+local flySpeed = 70
+local flyEnabled = false
+local flyConnection
+local flyVector = Vector3.new(0,0,0)
+local flyUp = 0
+local flyDown = 0
+
+-- Thumbstick (analógico mobile)
+UserInputService.InputChanged:Connect(function(input)
+	if not flyEnabled then return end
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.Gamepad1 then
+		if input.KeyCode == Enum.KeyCode.Thumbstick1 or input.KeyCode == Enum.KeyCode.Thumbstick2 then
+			flyVector = Vector3.new(input.Position.X, 0, -input.Position.Y)
+		end
+	end
+end)
+
+-- WASD/E/Q (PC)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if flyEnabled and input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.W then flyVector = Vector3.new(0, 0, -1) end
+		if input.KeyCode == Enum.KeyCode.S then flyVector = Vector3.new(0, 0, 1) end
+		if input.KeyCode == Enum.KeyCode.A then flyVector = Vector3.new(-1, 0, 0) end
+		if input.KeyCode == Enum.KeyCode.D then flyVector = Vector3.new(1, 0, 0) end
+		if input.KeyCode == Enum.KeyCode.E then flyUp = 1 end
+		if input.KeyCode == Enum.KeyCode.Q then flyDown = 1 end
+	end
+end)
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if flyEnabled and input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.E then flyUp = 0 end
+		if input.KeyCode == Enum.KeyCode.Q then flyDown = 0 end
+		if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.S or input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.D then
+			flyVector = Vector3.new(0, 0, 0)
+		end
+	end
+end)
+
+local function enableFly()
+	if flyEnabled then return end
+	flyEnabled = true
+	flyBtn.Text = "On"
+	showNotification("Fly: Ativado", Color3.fromRGB(120, 200, 255))
+	if flyConnection then
+		flyConnection:Disconnect()
+		flyConnection = nil
+	end
+	flyConnection = RunService.RenderStepped:Connect(function(dt)
+		local char = player.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if hrp and hum then
+			local move = flyVector + Vector3.new(0, flyUp - flyDown, 0)
+			if move.Magnitude > 0 then
+				move = move.Unit
+				local cam = workspace.CurrentCamera
+				local camCF = cam and cam.CFrame
+				if camCF then
+					move = (camCF.RightVector * move.X + camCF.LookVector * move.Z + Vector3.new(0, move.Y, 0))
+				end
+				local finalSpeed = flySpeed * (0.9 + clamp(speedValue/100, 0, 0.6))
+				pcall(function()
+					hrp.AssemblyLinearVelocity = move * finalSpeed
+				end)
+			else
+				pcall(function()
+					hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				end)
+			end
+		end
+	end)
+end
+
+local function disableFly()
+	if not flyEnabled then return end
+	flyEnabled = false
+	flyBtn.Text = "Off"
+	showNotification("Fly: Desativado", Color3.fromRGB(255,120,120))
+	if flyConnection then
+		flyConnection:Disconnect()
+		flyConnection = nil
+	end
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		pcall(function()
+			hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+		end)
+	end
+	flyVector = Vector3.new(0,0,0)
+	flyUp = 0
+	flyDown = 0
+end
+
+-- RESTANTE DO SCRIPT IGUAL AO SEU ORIGINAL
+local function enableInfiniteJump()
+	if infiniteJumpEnabled then return end
+	infiniteJumpEnabled = true
+	ijBtn.Text = "On"
+	showNotification("Infinite Jump: Ativado", Color3.fromRGB(120, 200, 255))
+	if ijConnection then
+		ijConnection:Disconnect()
+		ijConnection = nil
+	end
+	ijConnection = UserInputService.JumpRequest:Connect(function()
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			hum.Jump = true
+		end
+	end)
+end
+
+local function disableInfiniteJump()
+	if not infiniteJumpEnabled then return end
+	infiniteJumpEnabled = false
+	ijBtn.Text = "Off"
+	showNotification("Infinite Jump: Desativado", Color3.fromRGB(255,120,120))
+	if ijConnection then
+		ijConnection:Disconnect()
+		ijConnection = nil
+	end
+end
+
+local function createHighlightForChar(char)
+	if not char or not char:IsA("Model") then return nil end
+	local owner = Players:GetPlayerFromCharacter(char)
+	if owner == player then return nil end
+
+	local existing = char:FindFirstChild("KaioESP")
+	if existing and existing:IsA("Highlight") then
+		return existing
+	end
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "KaioESP"
+	highlight.Adornee = char
+	highlight.FillColor = Color3.fromRGB(255, 0, 0)
+	highlight.OutlineColor = Color3.fromRGB(150, 0, 0)
+	highlight.FillTransparency = 0.6
+	highlight.OutlineTransparency = 0.5
+	highlight.Parent = char
+	return highlight
+end
+
+local function onPlayerCharacterAdded(pl, char)
+	if espEnabled and pl ~= player then
+		local h = createHighlightForChar(char)
+		espHighlights[pl] = h
+	end
+end
+
+local function enableESP()
+	if espEnabled then return end
+	espEnabled = true
+	espBtn.Text = "On"
+	showNotification("ESP: Ativado", Color3.fromRGB(255,100,100))
+	for _, pl in ipairs(Players:GetPlayers()) do
+		if pl ~= player then
+			if pl.Character then
+				local h = createHighlightForChar(pl.Character)
+				espHighlights[pl] = h
+			end
+			if not playerCharConnections[pl] then
+				playerCharConnections[pl] = pl.CharacterAdded:Connect(function(c) onPlayerCharacterAdded(pl, c) end)
+			end
+		end
+	end
+	if not espPlayerAddedConn then
+		espPlayerAddedConn = Players.PlayerAdded:Connect(function(pl)
+			if pl ~= player then
+				playerCharConnections[pl] = pl.CharacterAdded:Connect(function(c) onPlayerCharacterAdded(pl, c) end)
+				if pl.Character then
+					local h = createHighlightForChar(pl.Character)
+					espHighlights[pl] = h
+				end
+			end
+		end)
+	end
+	if not espPlayerRemovingConn then
+		espPlayerRemovingConn = Players.PlayerRemoving:Connect(function(pl)
+			local h = espHighlights[pl]
+			if h and h.Parent then
+				h:Destroy()
+			end
+			espHighlights[pl] = nil
+
+			local conn = playerCharConnections[pl]
+			if conn then
+				conn:Disconnect()
+			end
+			playerCharConnections[pl] = nil
+		end)
+	end
+end
+
+local function disableESP()
+	if not espEnabled then return end
+	espEnabled = false
+	espBtn.Text = "Off"
+	showNotification("ESP: Desativado", Color3.fromRGB(255,120,120))
+	for pl, h in pairs(espHighlights) do
+		if h and h.Parent then
+			pcall(function() h:Destroy() end)
+		end
+		espHighlights[pl] = nil
+	end
+	for pl, conn in pairs(playerCharConnections) do
+		if conn then
+			pcall(function() conn:Disconnect() end)
+		end
+		playerCharConnections[pl] = nil
+	end
+	if espPlayerAddedConn then
+		espPlayerAddedConn:Disconnect()
+		espPlayerAddedConn = nil
+	end
+	if espPlayerRemovingConn then
+		espPlayerRemovingConn:Disconnect()
+		espPlayerRemovingConn = nil
+	end
+end
 
 player.CharacterAdded:Connect(function(char)
-	wait(0.1)
+	local humanoid = char:WaitForChild("Humanoid", 2)
+	if humanoid then
+		applySpeedToCharacter(char)
+	end
+	task.wait(0.1)
 	if noclipEnabled then
 		for _, part in ipairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
-		end
-	end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		if input.KeyCode == Enum.KeyCode.N then
-			if noclipEnabled then disableNoclip() else enableNoclip() end
 		end
 	end
 end)
 
 disableNoclip()
+speedBox.Text = tostring(DEFAULT_WALKSPEED)
+speedValue = DEFAULT_WALKSPEED
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.N then
+			if noclipEnabled then
+				disableNoclip()
+			else
+				enableNoclip()
+			end
+		end
+	end
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+	local char = player.Character
+	if char then
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = DEFAULT_WALKSPEED
+		end
+	end
+	disableNoclip()
+	stopSpeedLoop()
+	disableFly()
+	disableInfiniteJump()
+	disableESP()
+	if screenGui and screenGui.Parent then
+		screenGui:Destroy()
+	end
+end)
+
+local expanded = false
+expandBtn.MouseButton1Click:Connect(function()
+	expanded = not expanded
+	if expanded then
+		expandBtn.Text = "v"
+		frame.Size = UDim2.new(0, WINDOW_SIZE.X.Offset, 0, EXPANDED_HEIGHT)
+		extraFrame.Visible = true
+	else
+		expandBtn.Text = ">"
+		frame.Size = WINDOW_SIZE
+		extraFrame.Visible = false
+	end
+end)
+
+local onDebounce, offDebounce = false, false
+
+btnOn.MouseButton1Click:Connect(function()
+	if onDebounce then return end
+	onDebounce = true
+	enableNoclip()
+	task.delay(0.2, function() onDebounce = false end)
+end)
+
+btnOff.MouseButton1Click:Connect(function()
+	if offDebounce then return end
+	offDebounce = true
+	disableNoclip()
+	task.delay(0.2, function() offDebounce = false end)
+end)
+
+local function setSpeed(newSpeed, showMsg)
+	speedValue = clamp(math.floor(newSpeed + 0.5), MIN_SPEED, MAX_SPEED)
+	speedBox.Text = tostring(speedValue)
+	if showMsg then
+		showNotification("Speed: " .. tostring(speedValue), Color3.fromRGB(120, 200, 255))
+	end
+	applySpeedToCharacter(player.Character)
+end
+
+speedBox.FocusLost:Connect(function(enterPressed)
+	local n = tonumber(speedBox.Text)
+	if n then
+		setSpeed(n, true)
+	else
+		speedBox.Text = tostring(speedValue)
+	end
+end)
+
+plusBtn.MouseButton1Click:Connect(function()
+	setSpeed(speedValue + 2, true)
+end)
+minusBtn.MouseButton1Click:Connect(function()
+	setSpeed(speedValue - 2, true)
+end)
+
+speedBox.Text = tostring(DEFAULT_WALKSPEED)
+speedValue = DEFAULT_WALKSPEED
+startSpeedLoop()
+
+flyBtn.MouseButton1Click:Connect(function()
+	if flyEnabled then
+		disableFly()
+	else
+		enableFly()
+	end
+end)
+
+espBtn.MouseButton1Click:Connect(function()
+	if espEnabled then
+		disableESP()
+	else
+		enableESP()
+	end
+end)
+
+ijBtn.MouseButton1Click:Connect(function()
+	if infiniteJumpEnabled then
+		disableInfiniteJump()
+	else
+		enableInfiniteJump()
+	end
+end)
